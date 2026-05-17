@@ -48,20 +48,20 @@ public class PlayerMovement : MonoBehaviour
         if (!player_rb) return;
 
         float targetSpeed = InputManager.sprintInput ? movementStats.maxRunSpeed : movementStats.maxWalkSpeed;
-
+        
         if (moveInput != Vector2.zero)
         {
-            //IT HAS A BUG WHERE THE PLAYER MOVES FASTER WHILE TURNING TO LEFT SIDE
-            /*if(player_rb.linearVelocity.x > targetSpeed / 2)
+            Vector2 newVelocity;
+            if ((Mathf.Abs(player_rb.linearVelocity.x) > 0) && ((isFacingRight && moveInput.x < 0) || (!isFacingRight && moveInput.x > 0)) && movementStats.retainHorizontalMomentum)
             {
-                if(isFacingRight && moveInput.x < 0 || !isFacingRight && moveInput.x > 0)
-                {
-                    Debug.Log("Player turned");
-                    player_rb.linearVelocity = new Vector2(-player_rb.linearVelocity.x, player_rb.linearVelocity.y);
-                }
-            }*/
-            targetVelocity = new Vector2(targetSpeed * moveInput.x, player_rb.linearVelocity.y);
-            Vector2 newVelocity = Vector2.Lerp(player_rb.linearVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
+                newVelocity = new Vector2(-1 * player_rb.linearVelocity.x, player_rb.linearVelocity.y);
+            }
+            else
+            {
+                targetVelocity = new Vector2(targetSpeed * moveInput.x, player_rb.linearVelocity.y);
+                newVelocity = Vector2.Lerp(player_rb.linearVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
+            }
+
             player_rb.linearVelocity = newVelocity;
         }
         else if (moveInput == Vector2.zero)

@@ -21,6 +21,8 @@ public class MovementStats : ScriptableObject
 
     [Range(0, 10)]
     public float airDeceleration;
+
+    public bool retainHorizontalMomentum = true;
     //---------------------------------------
     [Header("Jump")]
 
