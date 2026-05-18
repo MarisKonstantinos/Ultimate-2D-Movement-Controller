@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 targetVelocity;
     private float verticalVelocity;
     private bool isFalling;
+    private bool initiateJump;
     private bool isJumping;
     private int totalJumpsAllowed;
     private int remainingJumpsAllowed;
@@ -24,6 +25,11 @@ public class PlayerMovement : MonoBehaviour
         player_rb = GetComponent<Rigidbody>();
         totalJumpsAllowed = movementStats.jumpsAllowed;
         remainingJumpsAllowed = totalJumpsAllowed;
+    }
+
+    private void Update()
+    {
+        JumpInputHandler();
     }
 
     private void FixedUpdate()
@@ -39,7 +45,7 @@ public class PlayerMovement : MonoBehaviour
 
         GroundCheck();
         Turn();
-        Jump();
+        JumpPhysicsHandler();
     }
 
     #region Move
@@ -90,14 +96,24 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Jump
-    private void Jump()
+
+    private void JumpInputHandler()
     {
-        if ((InputManager.jumpWasPressed && isGrounded) || (remainingJumpsAllowed > 0 && InputManager.jumpWasPressed && !isGrounded && isJumping))   
+        if ((InputManager.jumpWasPressed && isGrounded) || (remainingJumpsAllowed > 0 && InputManager.jumpWasPressed && !isGrounded && isJumping))
         {
             InputManager.jumpWasPressed = false;
             isJumping = true;
-            remainingJumpsAllowed--;
+            initiateJump = true;
+        }
+    }
+    
+    private void JumpPhysicsHandler()
+    {
+        if(initiateJump)
+        {
+            initiateJump = false;
             verticalVelocity = movementStats.initialJumpVelocity;
+            remainingJumpsAllowed--;
         }
 
         //Player ascending
