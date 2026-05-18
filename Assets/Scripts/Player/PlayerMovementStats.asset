@@ -18,6 +18,7 @@ MonoBehaviour:
   groundDeceleration: 10
   airAcceleration: 1.5
   airDeceleration: 10
+  retainHorizontalMomentum: 1
   jumpHeight: 2
   jumpHeightCompensationFactor: 1.054
   gravityFastFallMultiplier: 2

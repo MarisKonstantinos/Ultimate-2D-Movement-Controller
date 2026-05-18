@@ -92,7 +92,7 @@ public class PlayerMovement : MonoBehaviour
     #region Jump
     private void Jump()
     {
-        if ((InputManager.jumpWasPressed && isGrounded) || (remainingJumpsAllowed > 0 && InputManager.jumpWasPressed && !isGrounded))   
+        if ((InputManager.jumpWasPressed && isGrounded) || (remainingJumpsAllowed > 0 && InputManager.jumpWasPressed && !isGrounded && isJumping))   
         {
             InputManager.jumpWasPressed = false;
             isJumping = true;
