@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isJumping;
     private int totalJumpsAllowed;
     private int remainingJumpsAllowed;
+    private float _jumpBufferTimer;
 
     private void Awake()
     {
@@ -99,40 +100,51 @@ public class PlayerMovement : MonoBehaviour
 
     private void JumpInputHandler()
     {
-        if ((InputManager.jumpWasPressed && isGrounded) || (remainingJumpsAllowed > 0 && InputManager.jumpWasPressed && !isGrounded && isJumping))
+        //if ((InputManager.jumpWasPressed && isGrounded) || (InputManager.jumpWasPressed && remainingJumpsAllowed > 0 && !isGrounded && isJumping) || (InputManager.jumpWasPressed && !isGrounded))
+        if(InputManager.jumpWasPressed)
         {
             InputManager.jumpWasPressed = false;
-            isJumping = true;
-            initiateJump = true;
+            _jumpBufferTimer = movementStats.jumpBufferTimer;
         }
     }
     
     private void JumpPhysicsHandler()
     {
-        if(initiateJump)
+        if (_jumpBufferTimer > 0)
+            _jumpBufferTimer -= Time.fixedDeltaTime;
+        else
+            _jumpBufferTimer = 0;
+
+        Debug.Log("remaining jumps: " + remainingJumpsAllowed);
+        if (_jumpBufferTimer > 0 && (isGrounded || remainingJumpsAllowed > 0))
         {
-            initiateJump = false;
+            _jumpBufferTimer = 0;
+            isJumping = true;
+            isFalling = false;
             verticalVelocity = movementStats.initialJumpVelocity;
             remainingJumpsAllowed--;
+
+            if (remainingJumpsAllowed < 0)
+                remainingJumpsAllowed = movementStats.jumpsAllowed - 1;
         }
 
         //Player ascending
-        if(verticalVelocity > 0 && InputManager.jumpIsHeld)
+        if (verticalVelocity > 0 && InputManager.jumpIsHeld)
         {
             //Debug.Log("Ascending");
             verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player descending
-        else if((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded)
+        else if ((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded)
         {
             //Debug.Log("Descending");
             isFalling = true;
             verticalVelocity += movementStats.gravityFastFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player landed
-        else if(isJumping && isGrounded)
+        //Overwrites the initial velocity for the buffer. 
+        else if (isJumping && isGrounded && isFalling)
         {
-            //Debug.Log("Landing");
             remainingJumpsAllowed = totalJumpsAllowed;
             isFalling = false;
             verticalVelocity = 0;
