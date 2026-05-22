@@ -123,20 +123,25 @@ public class PlayerMovement : MonoBehaviour
             isJumping = true;
             isFalling = false;
             verticalVelocity = movementStats.initialJumpVelocity;
-            remainingJumpsAllowed--;
+
+            //If the player is falling without jumping he shouldn't be able to use more jumps
+            if (isGrounded)
+                remainingJumpsAllowed--;
+            else
+                remainingJumpsAllowed = 0;
 
             if (remainingJumpsAllowed < 0)
                 remainingJumpsAllowed = movementStats.jumpsAllowed - 1;
         }
 
         //Player ascending
-        if (verticalVelocity > 0 && InputManager.jumpIsHeld && !headBump)
+        if (verticalVelocity > 0 && InputManager.jumpIsHeld)
         {
             Debug.Log("Ascending");
             verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
         }
-        //Player descending
-        else if ((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded && !headBump)
+        //Player falling
+        else if ((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded)
         {
             Debug.Log("Descending");
             isFalling = true;
@@ -149,7 +154,6 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("Landed.");
             remainingJumpsAllowed = totalJumpsAllowed;
             isFalling = false;
-            isFastFalling = false;
             verticalVelocity = 0;
             isJumping = false;
         }
@@ -180,11 +184,7 @@ public class PlayerMovement : MonoBehaviour
         if(playerHead == null) return;
 
         headBump = Physics.CheckSphere(playerHead.position, movementStats.groundCheckRadius, movementStats.groundLayer);
-        if (headBump) isFastFalling = true;
     }
-
-    //Add function for headbump
-
     #endregion
 
     #region Debug functions
