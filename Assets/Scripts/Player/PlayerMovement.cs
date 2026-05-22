@@ -2,23 +2,28 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    //Public variables
+    //------PUBLIC VARS------
     [Header("References")]
     public MovementStats movementStats;
     [SerializeField] private Transform playerFeet;
+    [SerializeField] private Transform playerHead;
 
-    //----------------
-
+    //------PRIVATE VARS------
     private Rigidbody player_rb;
-    private bool isGrounded = false;
-    private bool isFacingRight = true;
     private Vector2 targetVelocity;
     private float verticalVelocity;
+
+    //------CHECKS------
+    private bool isGrounded = false;
+    private bool headBump = false;
+    private bool isFacingRight = true;
+    private bool isFastFalling;
     private bool isFalling;
-    private bool initiateJump;
     private bool isJumping;
     private int totalJumpsAllowed;
     private int remainingJumpsAllowed;
+
+    //------TIMERS------
     private float _jumpBufferTimer;
 
     private void Awake()
@@ -35,7 +40,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(isGrounded)
+        if (isGrounded)
         {
             Move(movementStats.groundAcceleration, movementStats.groundDeceleration, InputManager.moveInput);
         }
@@ -45,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         GroundCheck();
+        HeadBumpCheck();
         Turn();
         JumpPhysicsHandler();
     }
@@ -55,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         if (!player_rb) return;
 
         float targetSpeed = InputManager.sprintInput ? movementStats.maxRunSpeed : movementStats.maxWalkSpeed;
-        
+
         if (moveInput != Vector2.zero)
         {
             Vector2 newVelocity;
@@ -100,22 +106,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void JumpInputHandler()
     {
-        //if ((InputManager.jumpWasPressed && isGrounded) || (InputManager.jumpWasPressed && remainingJumpsAllowed > 0 && !isGrounded && isJumping) || (InputManager.jumpWasPressed && !isGrounded))
-        if(InputManager.jumpWasPressed)
+        if (InputManager.jumpWasPressed)
         {
             InputManager.jumpWasPressed = false;
             _jumpBufferTimer = movementStats.jumpBufferTimer;
         }
     }
-    
+
     private void JumpPhysicsHandler()
     {
-        if (_jumpBufferTimer > 0)
-            _jumpBufferTimer -= Time.fixedDeltaTime;
-        else
-            _jumpBufferTimer = 0;
+        TimersCountdown();
 
-        Debug.Log("remaining jumps: " + remainingJumpsAllowed);
         if (_jumpBufferTimer > 0 && (isGrounded || remainingJumpsAllowed > 0))
         {
             _jumpBufferTimer = 0;
@@ -129,29 +130,40 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Player ascending
-        if (verticalVelocity > 0 && InputManager.jumpIsHeld)
+        if (verticalVelocity > 0 && InputManager.jumpIsHeld && !headBump)
         {
-            //Debug.Log("Ascending");
+            Debug.Log("Ascending");
             verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player descending
-        else if ((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded)
+        else if ((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded && !headBump)
         {
-            //Debug.Log("Descending");
+            Debug.Log("Descending");
             isFalling = true;
-            verticalVelocity += movementStats.gravityFastFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
+            verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player landed
         //Overwrites the initial velocity for the buffer. 
         else if (isJumping && isGrounded && isFalling)
         {
+            Debug.Log("Landed.");
             remainingJumpsAllowed = totalJumpsAllowed;
             isFalling = false;
+            isFastFalling = false;
             verticalVelocity = 0;
             isJumping = false;
         }
+        
 
         player_rb.linearVelocity = new Vector2(player_rb.linearVelocity.x, verticalVelocity);
+    }
+
+    private void TimersCountdown()
+    {
+        if (_jumpBufferTimer > 0)
+            _jumpBufferTimer -= Time.fixedDeltaTime;
+        else
+            _jumpBufferTimer = 0;
     }
     #endregion
 
@@ -161,6 +173,14 @@ public class PlayerMovement : MonoBehaviour
         if (playerFeet == null) return;
 
         isGrounded = Physics.CheckSphere(playerFeet.position, movementStats.groundCheckRadius, movementStats.groundLayer);
+    }
+
+    private void HeadBumpCheck()
+    {
+        if(playerHead == null) return;
+
+        headBump = Physics.CheckSphere(playerHead.position, movementStats.groundCheckRadius, movementStats.groundLayer);
+        if (headBump) isFastFalling = true;
     }
 
     //Add function for headbump
@@ -183,6 +203,16 @@ public class PlayerMovement : MonoBehaviour
         }
         Gizmos.DrawWireSphere(playerFeet.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
         //------------------------------------------------
+
+        if (headBump)
+        {
+            Gizmos.color = Color.red; // Set the color for the circle
+        }
+        else
+        {
+            Gizmos.color = Color.green; // Set the color for the circle
+        }
+        Gizmos.DrawWireSphere(playerHead.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
     }
     #endregion
 }

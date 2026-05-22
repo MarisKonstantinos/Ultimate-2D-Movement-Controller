@@ -21,9 +21,9 @@ MonoBehaviour:
   retainHorizontalMomentum: 1
   jumpHeight: 2
   jumpHeightCompensationFactor: 1.054
-  gravityFastFallMultiplier: 1
-  jumpsAllowed: 1
-  jumpBufferTimer: 0.15
+  gravityFastFallMultiplier: 2
+  jumpsAllowed: 2
+  jumpBufferTimer: 0.2
   timeTillApexPoint: 0.5
   groundLayer:
     serializedVersion: 2
