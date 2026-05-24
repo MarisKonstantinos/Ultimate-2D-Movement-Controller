@@ -28,6 +28,7 @@ public class MovementStats : ScriptableObject
 
     [Range(1f,50f)] public float jumpHeight;
     [Range(1f, 1.1f)] public float jumpHeightCompensationFactor = 1.054f;
+    [Range(1f, 5f)] public float gravityFallMultiplier;
     [Range(1f, 5f)] public float gravityFastFallMultiplier;
     [Range(1f, 3f)] public int jumpsAllowed;
     [Range(0.0f, 0.5f)] public float jumpBufferTimer;

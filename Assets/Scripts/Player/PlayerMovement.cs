@@ -15,7 +15,7 @@ public class PlayerMovement : MonoBehaviour
 
     //------CHECKS------
     private bool isGrounded = false;
-    private bool headBump = false;
+    private bool hitCeiling = false;
     private bool isFacingRight = true;
     private bool isFastFalling;
     private bool isFalling;
@@ -50,7 +50,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         GroundCheck();
-        HeadBumpCheck();
+        CeilingCheck();
         Turn();
         JumpPhysicsHandler();
     }
@@ -117,12 +117,14 @@ public class PlayerMovement : MonoBehaviour
     {
         TimersCountdown();
 
+        //Initiating jump
         if (_jumpBufferTimer > 0 && (isGrounded || remainingJumpsAllowed > 0))
         {
+            Debug.Log("Entered.");
             _jumpBufferTimer = 0;
             isJumping = true;
             isFalling = false;
-            verticalVelocity = movementStats.initialJumpVelocity;
+            isFastFalling = false;
 
             //If the player is falling without jumping he shouldn't be able to use more jumps
             if (isGrounded)
@@ -132,30 +134,40 @@ public class PlayerMovement : MonoBehaviour
 
             if (remainingJumpsAllowed < 0)
                 remainingJumpsAllowed = movementStats.jumpsAllowed - 1;
+            
+            verticalVelocity = movementStats.initialJumpVelocity;
         }
 
         //Player ascending
-        if (verticalVelocity > 0 && InputManager.jumpIsHeld)
+        if (verticalVelocity > 0 && InputManager.jumpIsHeld && !hitCeiling)
         {
             Debug.Log("Ascending");
             verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player falling
-        else if ((verticalVelocity <= 0 || !InputManager.jumpIsHeld) && !isGrounded)
+        else if (isJumping && !isGrounded && !hitCeiling && !isFastFalling && (verticalVelocity <= 0 || !InputManager.jumpIsHeld))
         {
             Debug.Log("Descending");
+            //if (!isFalling) verticalVelocity = 0;
             isFalling = true;
-            verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
+            verticalVelocity += movementStats.gravityFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
         }
-        //Player landed
-        //Overwrites the initial velocity for the buffer. 
-        else if (isJumping && isGrounded && isFalling)
+        else if((verticalVelocity <= 0 && !isJumping && !isGrounded) || hitCeiling || (isFastFalling && isJumping && !isGrounded))
         {
-            Debug.Log("Landed.");
+            Debug.Log("Fast falling ");
+            if (!isFastFalling) verticalVelocity = 0;
+            isFastFalling = true;
+            verticalVelocity += movementStats.gravityFastFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
+        }
+        //Player landed 
+        else if (isGrounded && (isFalling || isFastFalling))
+        {
+            //Debug.Log("Landed.");
             remainingJumpsAllowed = totalJumpsAllowed;
-            isFalling = false;
             verticalVelocity = 0;
             isJumping = false;
+            isFalling = false;
+            isFastFalling = false;
         }
         
 
@@ -179,11 +191,11 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics.CheckSphere(playerFeet.position, movementStats.groundCheckRadius, movementStats.groundLayer);
     }
 
-    private void HeadBumpCheck()
+    private void CeilingCheck()
     {
         if(playerHead == null) return;
 
-        headBump = Physics.CheckSphere(playerHead.position, movementStats.groundCheckRadius, movementStats.groundLayer);
+        hitCeiling = Physics.CheckSphere(playerHead.position, movementStats.groundCheckRadius, movementStats.groundLayer);
     }
     #endregion
 
@@ -204,7 +216,7 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireSphere(playerFeet.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
         //------------------------------------------------
 
-        if (headBump)
+        if (hitCeiling)
         {
             Gizmos.color = Color.red; // Set the color for the circle
         }
