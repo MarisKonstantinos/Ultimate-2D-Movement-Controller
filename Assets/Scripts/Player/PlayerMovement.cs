@@ -148,10 +148,10 @@ public class PlayerMovement : MonoBehaviour
         else if (isJumping && !isGrounded && !hitCeiling && !isFastFalling && (verticalVelocity <= 0 || !InputManager.jumpIsHeld))
         {
             Debug.Log("Descending");
-            //if (!isFalling) verticalVelocity = 0;
             isFalling = true;
             verticalVelocity += movementStats.gravityFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
         }
+        //Player either falls of a cliff or hit a ceiling while jumping
         else if((verticalVelocity <= 0 && !isJumping && !isGrounded) || hitCeiling || (isFastFalling && isJumping && !isGrounded))
         {
             Debug.Log("Fast falling ");
@@ -162,7 +162,6 @@ public class PlayerMovement : MonoBehaviour
         //Player landed 
         else if (isGrounded && (isFalling || isFastFalling))
         {
-            //Debug.Log("Landed.");
             remainingJumpsAllowed = totalJumpsAllowed;
             verticalVelocity = 0;
             isJumping = false;
