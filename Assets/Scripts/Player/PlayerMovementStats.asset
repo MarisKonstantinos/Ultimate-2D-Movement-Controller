@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d1abdbe275b4924280ea93106c38680, type: 3}
   m_Name: PlayerMovementStats
   m_EditorClassIdentifier: Assembly-CSharp::MovementStats
-  maxWalkSpeed: 4
+  maxWalkSpeed: 5
   maxRunSpeed: 6.5
-  groundAcceleration: 2.5
+  groundAcceleration: 4.34
   groundDeceleration: 10
   airAcceleration: 1.5
   airDeceleration: 10
   retainHorizontalMomentum: 1
   jumpHeight: 2
   jumpHeightCompensationFactor: 1.054
-  gravityFastFallMultiplier: 2
+  gravityFallMultiplier: 2
+  gravityFastFallMultiplier: 2.5
   jumpsAllowed: 2
-  jumpBufferTimer: 0.2
+  jumpBufferTimer: 0.5
   timeTillApexPoint: 0.5
   groundLayer:
     serializedVersion: 2

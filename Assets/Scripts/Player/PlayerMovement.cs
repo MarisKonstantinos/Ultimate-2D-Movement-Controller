@@ -169,8 +169,8 @@ public class PlayerMovement : MonoBehaviour
             isFalling = false;
             isFastFalling = false;
         }
-        
 
+        verticalVelocity = Mathf.Clamp(verticalVelocity, -movementStats.maxFallSpeed, movementStats.initialJumpVelocity); 
         player_rb.linearVelocity = new Vector2(player_rb.linearVelocity.x, verticalVelocity);
     }
 
