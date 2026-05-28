@@ -120,7 +120,7 @@ public class PlayerMovement : MonoBehaviour
         TimersCountdown();
 
         //Initiating jump
-        if (_jumpBufferTimer > 0 && (isGrounded || remainingJumpsAllowed > 0))
+        if (_jumpBufferTimer > 0 && (isGrounded || _coyoteTimer > 0 || (remainingJumpsAllowed > 0 && isJumping)))
         {
             _jumpBufferTimer = 0;
             isJumping = true;
@@ -181,6 +181,7 @@ public class PlayerMovement : MonoBehaviour
             if (!isFastFalling)
             {
                 verticalVelocity = 0;
+                _coyoteTimer = movementStats.coyoteTime;
                 isFastFalling = true;
             }
             verticalVelocity += movementStats.gravityFastFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
