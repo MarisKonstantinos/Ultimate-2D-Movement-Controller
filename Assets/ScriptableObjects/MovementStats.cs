@@ -33,6 +33,8 @@ public class MovementStats : ScriptableObject
     [Range(1f, 3f)] public int jumpsAllowed;
     [Range(0.0f, 0.5f)] public float jumpBufferTimer;
     [Range(0.0f, 50f)] public float maxFallSpeed;
+    [Range(0.0f, 1.0f)] public float apexHangTime;
+    [Range(0.0f, 2)] public float coyoteTime;
     public float timeTillApexPoint;
 
     public float gravity { get; private set; }

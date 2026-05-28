@@ -25,6 +25,9 @@ MonoBehaviour:
   gravityFastFallMultiplier: 2.5
   jumpsAllowed: 2
   jumpBufferTimer: 0.5
+  maxFallSpeed: 25
+  apexHangTime: 0.1
+  coyoteTime: 2
   timeTillApexPoint: 0.5
   groundLayer:
     serializedVersion: 2

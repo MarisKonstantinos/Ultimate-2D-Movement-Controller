@@ -25,6 +25,8 @@ public class PlayerMovement : MonoBehaviour
 
     //------TIMERS------
     private float _jumpBufferTimer;
+    private float _apexHangTimer;
+    private float _coyoteTimer;
 
     private void Awake()
     {
@@ -120,43 +122,67 @@ public class PlayerMovement : MonoBehaviour
         //Initiating jump
         if (_jumpBufferTimer > 0 && (isGrounded || remainingJumpsAllowed > 0))
         {
-            Debug.Log("Entered.");
             _jumpBufferTimer = 0;
             isJumping = true;
             isFalling = false;
             isFastFalling = false;
+            
 
             //If the player is falling without jumping he shouldn't be able to use more jumps
             if (isGrounded)
+            {
                 remainingJumpsAllowed--;
+            }
             else
+            {
+                _coyoteTimer = 0;
                 remainingJumpsAllowed = 0;
+            }
 
             if (remainingJumpsAllowed < 0)
                 remainingJumpsAllowed = movementStats.jumpsAllowed - 1;
-            
+
             verticalVelocity = movementStats.initialJumpVelocity;
         }
 
         //Player ascending
         if (verticalVelocity > 0 && InputManager.jumpIsHeld && !hitCeiling)
         {
-            Debug.Log("Ascending");
+            //Debug.Log("Ascending");
             verticalVelocity += movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player falling
         else if (isJumping && !isGrounded && !hitCeiling && !isFastFalling && (verticalVelocity <= 0 || !InputManager.jumpIsHeld))
         {
-            Debug.Log("Descending");
-            isFalling = true;
-            verticalVelocity += movementStats.gravityFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
+            //Debug.Log("Descending");
+            if(!isFalling)
+            {
+                isFalling = true;
+                _apexHangTimer = movementStats.apexHangTime;
+            }
+
+            float gravity = movementStats.gravityFallMultiplier * 
+                            movementStats.gravity * 
+                            Time.fixedDeltaTime;
+
+            if (verticalVelocity <= 0 && _apexHangTimer > 0)
+            {
+                verticalVelocity = 0;
+            }
+            else
+            {
+                verticalVelocity += gravity;
+            }
         }
         //Player either falls of a cliff or hit a ceiling while jumping
         else if((verticalVelocity <= 0 && !isJumping && !isGrounded) || hitCeiling || (isFastFalling && isJumping && !isGrounded))
         {
-            Debug.Log("Fast falling ");
-            if (!isFastFalling) verticalVelocity = 0;
-            isFastFalling = true;
+            //Debug.Log("Fast falling ");
+            if (!isFastFalling)
+            {
+                verticalVelocity = 0;
+                isFastFalling = true;
+            }
             verticalVelocity += movementStats.gravityFastFallMultiplier * movementStats.gravity * Time.fixedDeltaTime;
         }
         //Player landed 
@@ -179,6 +205,16 @@ public class PlayerMovement : MonoBehaviour
             _jumpBufferTimer -= Time.fixedDeltaTime;
         else
             _jumpBufferTimer = 0;
+
+        if (_apexHangTimer > 0)
+            _apexHangTimer -= Time.fixedDeltaTime;
+        else
+            _apexHangTimer = 0;
+
+        if (_coyoteTimer > 0)
+            _coyoteTimer -= Time.fixedDeltaTime;
+        else
+            _coyoteTimer = 0;
     }
     #endregion
 
