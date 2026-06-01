@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d1abdbe275b4924280ea93106c38680, type: 3}
   m_Name: PlayerMovementStats
   m_EditorClassIdentifier: Assembly-CSharp::MovementStats
-  maxWalkSpeed: 5
+  maxWalkSpeed: 4
   maxRunSpeed: 6.5
-  groundAcceleration: 4.34
+  groundAcceleration: 4
   groundDeceleration: 10
   airAcceleration: 1.5
   airDeceleration: 10
@@ -33,3 +33,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   groundCheckRadius: 0.108
+  ceillingCheckRadius: 0.3
