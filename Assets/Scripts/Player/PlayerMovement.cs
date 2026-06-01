@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -27,6 +28,14 @@ public class PlayerMovement : MonoBehaviour
     private float _jumpBufferTimer;
     private float _apexHangTimer;
     private float _coyoteTimer;
+
+    //------DEBUGS------
+    [Header("Debug")]
+    [SerializeField] private bool drawJumpTrajectory = true;
+    [SerializeField] private int trajectoryResolution = 60;
+    [SerializeField] private float trajectoryTimeStep = 0.05f;
+    [SerializeField] private Color walkTrajectoryColor = Color.yellow;
+    [SerializeField] private Color runTrajectoryColor = Color.cyan;
 
     private void Awake()
     {
@@ -158,6 +167,7 @@ public class PlayerMovement : MonoBehaviour
             if(!isFalling)
             {
                 isFalling = true;
+                Debug.Log("Apex point: " + player_rb.transform.localPosition.y);
                 _apexHangTimer = movementStats.apexHangTime;
             }
 
@@ -231,36 +241,111 @@ public class PlayerMovement : MonoBehaviour
     {
         if(playerHead == null) return;
 
-        hitCeiling = Physics.CheckSphere(playerHead.position, movementStats.groundCheckRadius, movementStats.groundLayer);
+        hitCeiling = Physics.CheckSphere(playerHead.position, movementStats.ceillingCheckRadius, movementStats.groundLayer);
     }
     #endregion
 
     #region Debug functions
-    private void OnDrawGizmos()
-    {
-        //---------GROUND CHECK GIZMO---------------------
-        if (playerFeet == null) return;
+    #if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            DrawGroundChecks();
 
-        if (isGrounded)
-        {
-            Gizmos.color = Color.red; // Set the color for the circle
+            if (drawJumpTrajectory)
+            {
+                DrawJumpTrajectory(movementStats.maxWalkSpeed, walkTrajectoryColor);
+                DrawJumpTrajectory(movementStats.maxRunSpeed, runTrajectoryColor);
+            }
         }
-        else
-        {
-            Gizmos.color = Color.green; // Set the color for the circle
-        }
-        Gizmos.DrawWireSphere(playerFeet.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
-        //------------------------------------------------
 
-        if (hitCeiling)
+        private void DrawGroundChecks()
         {
-            Gizmos.color = Color.red; // Set the color for the circle
+            if (playerFeet == null) return;
+         
+            //---------GROUND CHECK GIZMO---------------------
+            Gizmos.color = isGrounded ? Color.red : Color.green;
+            Gizmos.DrawWireSphere(playerFeet.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
+
+            //---------CEILLING CHECK GIZMO---------------------
+            Gizmos.color = hitCeiling ? Color.red : Color.green;
+            Gizmos.DrawWireSphere(playerHead.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
         }
-        else
+
+        private void DrawJumpTrajectory(float horizontalVelocity, Color color)
         {
-            Gizmos.color = Color.green; // Set the color for the circle
+            Gizmos.color = color;
+
+            Vector3 currentPosition = transform.position;
+
+            float verticalVelocity =
+                movementStats.initialJumpVelocity;
+
+            bool simulatedFalling = false;
+            float simulatedApexHangTimer = 0f;
+
+            Vector3 previousPoint = currentPosition;
+
+            for (int i = 0; i < trajectoryResolution; i++)
+            {
+                //------------------------------------
+                // Horizontal Movement
+                //------------------------------------
+                currentPosition.x +=
+                    horizontalVelocity * trajectoryTimeStep;
+
+                //------------------------------------
+                // Ascending
+                //------------------------------------
+                if (verticalVelocity > 0)
+                {
+                    verticalVelocity +=
+                        movementStats.gravity *
+                        trajectoryTimeStep;
+                }
+                //------------------------------------
+                // Start Apex Hang
+                //------------------------------------
+                else if (!simulatedFalling)
+                {
+                    simulatedFalling = true;
+                    simulatedApexHangTimer =
+                        movementStats.apexHangTime;
+                }
+
+                //------------------------------------
+                // Apex Hang
+                //------------------------------------
+                if (simulatedFalling &&
+                    simulatedApexHangTimer > 0)
+                {
+                    simulatedApexHangTimer -=
+                        trajectoryTimeStep;
+
+                    verticalVelocity = 0;
+                }
+                //------------------------------------
+                // Falling
+                //------------------------------------
+                else if (simulatedFalling)
+                {
+                    verticalVelocity +=
+                        movementStats.gravity *
+                        movementStats.gravityFallMultiplier *
+                        trajectoryTimeStep;
+                }
+
+                //------------------------------------
+                // Apply Vertical Movement
+                //------------------------------------
+                currentPosition.y +=
+                    verticalVelocity * trajectoryTimeStep;
+
+                Gizmos.DrawLine(previousPoint, currentPosition);
+
+                previousPoint = currentPosition;
+            }
         }
-        Gizmos.DrawWireSphere(playerHead.position, movementStats.groundCheckRadius); // Draw a wire sphere at the ground check position
-    }
+    #endif
     #endregion
 }
+

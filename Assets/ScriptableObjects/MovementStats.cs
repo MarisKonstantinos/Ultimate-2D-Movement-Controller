@@ -3,29 +3,17 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "MovementStats", menuName = "Scriptable Objects/MovementStats")]
 public class MovementStats : ScriptableObject
 {
-    [Header("Movement Stats")]
-    [Range(0,100)]
-    public float maxWalkSpeed;
-
-    [Range(0, 100)]
-    public float maxRunSpeed;
-
-    [Range(0, 10)]
-    public float groundAcceleration;
-
-    [Range(0, 10)]
-    public float groundDeceleration;
-
-    [Range(0, 10)]
-    public float airAcceleration;
-
-    [Range(0, 10)]
-    public float airDeceleration;
-
+    //------HORIZONTAL MOVEMENT------
+    [Header("Horizontal movement")]
+    [Range(0,100)] public float maxWalkSpeed;
+    [Range(0, 100)] public float maxRunSpeed;
+    [Range(0, 10)] public float groundAcceleration;
+    [Range(0, 10)] public float groundDeceleration;
+    [Range(0, 10)] public float airAcceleration;
+    [Range(0, 10)] public float airDeceleration;
     public bool retainHorizontalMomentum = true;
-    //---------------------------------------
-    [Header("Jump")]
-
+    //------VERTICAL MOVEMENT------
+    [Header("Vertical movement")]
     [Range(1f,50f)] public float jumpHeight;
     [Range(1f, 1.1f)] public float jumpHeightCompensationFactor = 1.054f;
     [Range(1f, 5f)] public float gravityFallMultiplier;
@@ -65,4 +53,7 @@ public class MovementStats : ScriptableObject
 
     [Range(0, 0.5f)]
     public float groundCheckRadius = 0.3f;
+
+    [Range(0, 0.5f)]
+    public float ceillingCheckRadius = 0.3f;
 }
