@@ -21,7 +21,6 @@ public class PlayerMovement : MonoBehaviour
     private bool isFastFalling;
     private bool isFalling;
     private bool isJumping;
-    private int totalJumpsAllowed;
     private int remainingJumpsAllowed;
 
     //------TIMERS------
@@ -40,8 +39,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         player_rb = GetComponent<Rigidbody>();
-        totalJumpsAllowed = movementStats.jumpsAllowed;
-        remainingJumpsAllowed = totalJumpsAllowed;
+        remainingJumpsAllowed = movementStats.jumpsAllowed;
     }
 
     private void Update()
@@ -138,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
             
 
             //If the player is falling without jumping he shouldn't be able to use more jumps
-            if (isGrounded)
+            if (isGrounded || (remainingJumpsAllowed > 0 && !isFastFalling))
             {
                 remainingJumpsAllowed--;
             }
@@ -147,9 +145,6 @@ public class PlayerMovement : MonoBehaviour
                 _coyoteTimer = 0;
                 remainingJumpsAllowed = 0;
             }
-
-            if (remainingJumpsAllowed < 0)
-                remainingJumpsAllowed = movementStats.jumpsAllowed - 1;
 
             verticalVelocity = movementStats.initialJumpVelocity;
         }
@@ -167,7 +162,6 @@ public class PlayerMovement : MonoBehaviour
             if(!isFalling)
             {
                 isFalling = true;
-                Debug.Log("Apex point: " + player_rb.transform.localPosition.y);
                 _apexHangTimer = movementStats.apexHangTime;
             }
 
@@ -199,7 +193,7 @@ public class PlayerMovement : MonoBehaviour
         //Player landed 
         else if (isGrounded && (isFalling || isFastFalling))
         {
-            remainingJumpsAllowed = totalJumpsAllowed;
+            remainingJumpsAllowed = movementStats.jumpsAllowed;
             verticalVelocity = 0;
             isJumping = false;
             isFalling = false;
