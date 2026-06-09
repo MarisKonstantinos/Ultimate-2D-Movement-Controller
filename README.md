@@ -78,10 +78,10 @@ Displays predicted jump trajectories to assist with movement tuning and debuggin
 ### Planned
 
 - Slope handling
+- Moving platforms handling
 - Wall slide
 - Wall jump
 - Air dash
-
 ---
 
 ## Technologies
