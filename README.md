@@ -77,6 +77,7 @@ Displays predicted jump trajectories to assist with movement tuning and debuggin
 
 ### Planned
 
+- Change controller to use state machine
 - Slope handling
 - Moving platforms handling
 - Wall slide
